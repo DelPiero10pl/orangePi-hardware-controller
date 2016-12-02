@@ -5,18 +5,32 @@ wpi.setup('wpi');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: '1:'+(+!wpi.digitalRead(1))+' 2:'+(+!wpi.digitalRead(2))+' 3:'+(+!wpi.digitalRead(3)) });
+  const json = [
+    {
+      'pin': 1,
+      'status': (+!wpi.digitalRead(1))
+    },
+    {
+      'pin': 2,
+      'status': (+!wpi.digitalRead(2))
+    },
+    {
+      'pin': 3,
+      'status': (+!wpi.digitalRead(3))
+    }
+  ];
+  res.json(json);
 });
 
 router.get('/status/:id', function(req, res, next) {
-  res.render('index', { title: req.params.id+':'+(+!wpi.digitalRead(parseInt(req.params.id))) });
+  res.json({'pin': req.params.id, 'status': (+!wpi.digitalRead(parseInt(req.params.id))) });
 });
 
 router.get('/on/:id', function(req, res, next) {
   const pin = parseInt(req.params.id);
   wpi.pinMode(pin, wpi.OUTPUT);
   wpi.digitalWrite(pin, 0);
-  res.render('index', { title: 'On led: '+pin });
+  res.json({'pin': pin, 'status': 1});
 });
 
 router.get('/off', function(req, res, next) {
@@ -24,14 +38,14 @@ router.get('/off', function(req, res, next) {
     wpi.pinMode(i, wpi.OUTPUT);
     wpi.digitalWrite(i, 1);
   }
-  res.render('index', { title: 'Off all' });
+  res.json({'msg': 'all pins off'});
 });
 
 router.get('/off/:id', function(req, res, next) {
   const pin = parseInt(req.params.id);
   wpi.pinMode(pin, wpi.OUTPUT);
   wpi.digitalWrite(pin, 1);
-  res.render('index', { title: 'Off led: '+pin });
+  res.json({'pin': pin, 'status': 0});
 });
 
 module.exports = router;
