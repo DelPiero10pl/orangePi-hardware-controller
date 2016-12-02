@@ -4,7 +4,7 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-
+const wpi = require('wiring-op');
 
 const index = require('./routes/index');
 const led = require('./routes/gpioWebApi');
@@ -12,6 +12,12 @@ const led = require('./routes/gpioWebApi');
 const app = express();
 const io = require('socket.io')();
 app.io = io;
+
+wpi.setup('wpi');
+const devices = require('./device_list.json');
+devices.forEach((row) => {
+  wpi.pinMode(row.pin, wpi.OUTPUT);
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

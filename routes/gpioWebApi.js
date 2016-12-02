@@ -1,6 +1,6 @@
-var express = require('express');
-var router = express.Router();
-var wpi = require('wiring-op');
+const express = require('express');
+const router = express.Router();
+const wpi = require('wiring-op');
 wpi.setup('wpi');
 
 /* GET home page. */
