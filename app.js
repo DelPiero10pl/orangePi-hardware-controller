@@ -5,14 +5,21 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const wpi = require('wiring-op');
+const mongoose   = require('mongoose');
+const fs = require('fs');
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/hwc');
 
 const index = require('./routes/index');
 const led = require('./routes/gpioWebApi');
+const devicesRoute = require('././routes/devices');
+const groupRoute = require('././routes/groups');
 
 const app = express();
 const io = require('socket.io')();
 app.io = io;
 
+//Set pin to out
 wpi.setup('wpi');
 const devices = require('./device_list.json');
 devices.forEach((row) => {
@@ -33,12 +40,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/led', led);
+app.use('/devices', devicesRoute);
+app.use('/group', groupRoute);
 
 const dataConsumer = require('./routes/sockets/dataConsumer');
 
 app.io.on('connection', function(socket) {
   dataConsumer(socket);
 });
+
+var models_path = __dirname + '/models'
+fs.readdirSync(models_path).forEach(function (file) {
+  require(models_path+'/'+file)
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -5,20 +5,14 @@ wpi.setup('wpi');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  const json = [
-    {
-      'pin': 1,
-      'status': (+!wpi.digitalRead(1))
-    },
-    {
-      'pin': 2,
-      'status': (+!wpi.digitalRead(2))
-    },
-    {
-      'pin': 3,
-      'status': (+!wpi.digitalRead(3))
-    }
-  ];
+  let json = [];
+  const devices = require('../device_list.json');
+  devices.forEach(row => {
+    json.push({
+          'pin': row.pin,
+          'status': (+!wpi.digitalRead(row.pin))
+    });
+  });
   res.json(json);
 });
 
