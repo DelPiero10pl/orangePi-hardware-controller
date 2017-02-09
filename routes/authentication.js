@@ -4,13 +4,26 @@ const User = mongoose.model('User');
 const express = require('express')
 const router = express.Router()
 const RouteUtil = require('../util/routeUtil')
-
+const AuthUtil = require('../util/authUtil')
+const Ajv = require('ajv');
+const ajv = new Ajv();
+const jwt = require('express-jwt');
+const auth = jwt({ secret: 'MY_SECRET', userProperty: 'payload' });
 
 router.post('/register', async (req, res, next) => {
-    User.count({}, function (err, count) {
-        var user = new User();
-        user.acountType = (count == 0) ? 'Admin' : 'User';
-        user.username = req.body.username;
+    User.count({}, (err, count) => {
+        if(count>=2) {
+            RouteUtil.statusResponse(403, res)
+            return
+        }
+        const user = new User();
+        if(count == 0) {
+            user.acountType = 'Admin';
+            user.username = 'administrator';
+        } else {
+            user.acountType = 'User';
+            user.username = 'user';
+        }
         user.setPassword(req.body.password);
         user.save(e => {
             if (e) {
@@ -46,7 +59,6 @@ router.post('/login', async (req, res, next) => {
             res.status(404).json(err);
             return;
         }
-
         // If a user is found
         if (user) {
             token = user.generateJwt();
@@ -60,5 +72,18 @@ router.post('/login', async (req, res, next) => {
         }
     })(req, res);
 });
+
+
+router.post('/changeuserpassword', auth, async (req, res, next) => {
+    AuthUtil.requireAdmin(req.payload, res)
+    try {
+        const user = await User.findOne({username: 'user', acountType: 'User'}).exec()
+        user.setPassword(req.body.password)
+        await user.save()
+        RouteUtil.statusResponse(200, res)
+    } catch(e) {
+        RouteUtil.statusResponse(500, res)
+    }
+})
 
 module.exports = router;

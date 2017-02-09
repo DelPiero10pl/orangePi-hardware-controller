@@ -5,7 +5,8 @@ const GpioUtil = require('../util/gpioUtil')
 const groupSchema = new Schema({
   name: String,
   status: Number,
-  devices: [{type: Schema.Types.ObjectId, ref: 'Device'}]
+  devices: [{type: Schema.Types.ObjectId, ref: 'Device'}],
+  powerStatuses: Array
 });
 
 groupSchema.pre('remove', function(next) {
@@ -22,7 +23,11 @@ groupSchema.post('save', async function (doc) {
   const group = this;
   if(doc.devices) {
       let tmp  = await group.model('Group').findById(doc._id).populate('devices').exec()
-      tmp.devices.forEach(item => GpioUtil.setStatus(item.pin, doc.status));
+      tmp.devices.forEach(item => {
+        console.log("POST_SAVE", item.pin)
+        console.log("POST_SAVE_STATUS", doc.status)
+        GpioUtil.setStatus(item.pin, doc.status)
+      });
   }
 });
 

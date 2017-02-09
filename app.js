@@ -35,7 +35,13 @@ wpi.setup('wpi')
 const devices = require('./device_list.json')
 devices.forEach((row) => {
   wpi.pinMode(row.pin, wpi.OUTPUT)
-  wpi.digitalWrite(row.pin, 1)
+  //wpi.digitalWrite(row.pin, 1)
+})
+
+const GpioUtil = require('./util/gpioUtil')
+
+mongoose.model('Group').find({}).populate('devices').exec((err, docs)=> {
+  docs.forEach( row=> row.devices.forEach(dev=> GpioUtil.setStatus(dev.pin, row.status)))
 })
 
 const dataConsumer = require('./routes/sockets/dataConsumer')
@@ -49,10 +55,12 @@ app.use(passport.initialize());
 const devicesRoute = require('././routes/devices');
 const groupRoute = require('././routes/groups');
 const authRoute = require('././routes/authentication');
+const messagesRoute = require('././routes/messages');
 
 app.use('/api/auth', authRoute);
 app.use('/api/device', devicesRoute);
 app.use('/api/group', groupRoute);
+app.use('/api/message', messagesRoute);
 
 app.use(function (err, req, res, next) {
   if (err.name === 'UnauthorizedError') {
