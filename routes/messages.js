@@ -19,7 +19,7 @@ router.get('/clean', auth, async (req, res, next) => {
 
 router.get('/', auth, async (req, res, next) => {
   try {
-   const messages = await Message.find().sort({_id: -1}).exec()
+   const messages = await Message.find().sort({_id: -1}).limit(100).exec()
    res.json(messages)
   }catch (e) {
     RouteUtil.statusResponse(500,res);

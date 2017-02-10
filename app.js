@@ -17,7 +17,7 @@ mongoose.Promise = global.Promise
 mongoose.connect('mongodb://localhost/hwc')
 
 server.listen(3000);
-
+app.use(express.static('public'))
 //Models
 var models_path = __dirname + '/models'
 fs.readdirSync(models_path).forEach(function (file) {

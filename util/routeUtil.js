@@ -12,7 +12,7 @@ codeMsg[500] = 'Internal Server Error'
 
 class RouteUtil {
   static statusResponse (status, res) {
-    res.status(status).json({err: status, msg: codeMsg[status]});
+    res.status(status).json({code: status, msg: codeMsg[status]});
   }
 }
 

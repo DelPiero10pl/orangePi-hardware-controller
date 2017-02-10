@@ -7,17 +7,18 @@ const RouteUtil = require('../util/routeUtil')
 const AuthUtil = require('../util/authUtil')
 const Ajv = require('ajv');
 const ajv = new Ajv();
-const jwt = require('express-jwt');
-const auth = jwt({ secret: 'MY_SECRET', userProperty: 'payload' });
+
+var jwt = require('express-jwt');
+var auth = jwt({ secret: 'MY_SECRET', userProperty: 'payload' });
 
 router.post('/register', async (req, res, next) => {
     User.count({}, (err, count) => {
-        if(count>=2) {
+        if (count >= 2) {
             RouteUtil.statusResponse(403, res)
             return
         }
         const user = new User();
-        if(count == 0) {
+        if (count == 0) {
             user.acountType = 'Admin';
             user.username = 'administrator';
         } else {
@@ -77,13 +78,39 @@ router.post('/login', async (req, res, next) => {
 router.post('/changeuserpassword', auth, async (req, res, next) => {
     AuthUtil.requireAdmin(req.payload, res)
     try {
-        const user = await User.findOne({username: 'user', acountType: 'User'}).exec()
+        const user = await User.findOne({ username: 'user', acountType: 'User' }).exec()
         user.setPassword(req.body.password)
         await user.save()
         RouteUtil.statusResponse(200, res)
-    } catch(e) {
+    } catch (e) {
         RouteUtil.statusResponse(500, res)
     }
+})
+
+router.post('/newpassword', auth, async (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        // If Passport throws/catches an error
+        if (err) {
+            res.status(404).json(err);
+            return;
+        }
+        // If a user is found
+        if (user) {
+            if (req.body.newPassword === req.body.newPassword2) {
+                user.setPassword(req.body.newPassword);
+                user.save(err => {
+                    if (err) RouteUtil.statusResponse(500, res)
+                    else {
+                        RouteUtil.statusResponse(200, res)
+                    }
+                });
+            } else RouteUtil.statusResponse(400, res)
+
+        } else {
+            // If user is not found
+            RouteUtil.statusResponse(401, res)
+        }
+    })(req, res);
 })
 
 module.exports = router;

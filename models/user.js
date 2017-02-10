@@ -36,6 +36,7 @@ userSchema.methods.generateJwt = function() {
     username: this.username,
     acountType: this.acountType,
     exp: parseInt(expiry.getTime() / 1000),
+    jti: this._id+crypto.randomBytes(Math.ceil(998/2)).toString('hex')
   }, "MY_SECRET"); // DO NOT KEEP YOUR SECRET IN THE CODE!
 };
 

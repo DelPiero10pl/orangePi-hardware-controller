@@ -96,7 +96,9 @@ router.get('/powerstationstatuses', async (req, res, next) => {
   request('http://localhost:8080', function (error, response, body) {
     if (!error && response.statusCode == 200) {
       body = JSON.parse(body)
-      res.json(body.all_status.filter(i => i!=='Brak'));
+      let statuses = body.all_status
+      statuses.push("Bardzo ważne")
+      res.json(statuses.filter(i => i!=='Brak'));
     } else {
       res.json([]);
     }
@@ -135,6 +137,7 @@ router.put('/decision/:id', async (req, res, next) => {
       RouteUtil.statusResponse(200, res)
     } else RouteUtil.statusResponse(404, res)
   } catch (e) {
+    console.log(e)
     if (e.code && e.code === 400)
       RouteUtil.statusResponse(400, res)
     else

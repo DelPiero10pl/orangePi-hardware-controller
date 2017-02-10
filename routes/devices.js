@@ -110,7 +110,6 @@ router.patch('/:id', auth, async (req, res, next) => {
         { multi: true }).exec();
       res.status(200).json(device);
   } catch (e) {
-    console.log(e);
     RouteUtil.statusResponse(500, res);
   }
 })
